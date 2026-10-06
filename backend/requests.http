@@ -1,0 +1,120 @@
+### Vérifier que le backend fonctionne
+GET http://localhost:5000/api/health
+
+
+### Inscription - nouvel utilisateur
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+    "email": "test3@projet-spe4.fr",
+    "password": "MotDePasse789!",
+    "firstName": "Pierre",
+    "lastName": "Test"
+}
+
+
+### Inscription - adresse e-mail déjà utilisée
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+    "email": "test@projet-spe4.fr",
+    "password": "NouveauMotDePasse123!",
+    "firstName": "Autre",
+    "lastName": "Test"
+}
+
+### Inscription - champs obligatoires
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+    "email": "test4@projet-spe4.fr",
+    "password": "",
+    "firstName": "Test",
+    "lastName": "Validation"
+}
+
+### Inscription - e-mail invalide
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+    "email": "email-invalide",
+    "password": "MotDePasse123!",
+    "firstName": "Test",
+    "lastName": "Validation"
+}
+
+### Inscription - mot de passe trop court
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+    "email": "test5@projet-spe4.fr",
+    "password": "1234567",
+    "firstName": "Test",
+    "lastName": "Validation"
+}
+
+### Inscription - prénom vide
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+    "email": "test6@projet-spe4.fr",
+    "password": "MotDePasse123!",
+    "firstName": "   ",
+    "lastName": "Validation"
+}
+
+### Connexion - identifiants corrects
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "test@projet-spe4.fr",
+    "password": "MotDePasse123!"
+}
+
+
+### Connexion - mauvais mot de passe
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "test@projet-spe4.fr",
+    "password": "MauvaisMotDePasse!"
+}
+
+
+### Connexion - e-mail inexistant
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "inexistant@projet-spe4.fr",
+    "password": "MotDePasse123!"
+}
+
+### Connexion - compte bloqué
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "test@projet-spe4.fr",
+    "password": "MotDePasse123!"
+}
+
+### Accéder au profil - sans token
+GET http://localhost:5000/api/auth/me
+
+
+### Accéder au profil - avec token
+GET http://localhost:5000/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTI5MzE5NSwiZXhwIjoxNzkxMjk2Nzk1fQ.uUL60gYi9CFW7am3yXypOj9slc1Fcdkt0XIu1XqwH60
+
+### Déconnexion
+POST http://localhost:5000/api/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTI5MzE5NSwiZXhwIjoxNzkxMjk2Nzk1fQ.uUL60gYi9CFW7am3yXypOj9slc1Fcdkt0XIu1XqwH60
