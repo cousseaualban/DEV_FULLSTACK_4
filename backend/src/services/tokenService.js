@@ -12,6 +12,32 @@ const generateToken = (user) => {
     );
 };
 
+const generateTwoFactorToken = (user) => {
+    return jwt.sign(
+        {
+            userId: user.id,
+            twoFactorPending: true
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: '5m'
+        }
+    );
+};
+
+const verifyTwoFactorToken = (token) => {
+    const decodedToken = jwt.verify(
+        token,
+        process.env.JWT_SECRET
+    );
+
+    if (!decodedToken.twoFactorPending) {
+        throw new Error('Token 2FA invalide');
+    }
+
+    return decodedToken;
+};
+
 const verifyToken = (token) => {
     return jwt.verify(
         token,
@@ -21,5 +47,7 @@ const verifyToken = (token) => {
 
 module.exports = {
     generateToken,
-    verifyToken
+    verifyToken,
+    generateTwoFactorToken,
+    verifyTwoFactorToken
 };

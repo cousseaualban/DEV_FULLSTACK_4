@@ -75,7 +75,7 @@ Content-Type: application/json
 
 {
     "email": "test@projet-spe4.fr",
-    "password": "MotDePasse123!"
+    "password": "NouveauMotDePasse101112!"
 }
 
 
@@ -113,8 +113,52 @@ GET http://localhost:5000/api/auth/me
 
 ### Accéder au profil - avec token
 GET http://localhost:5000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTI5MzE5NSwiZXhwIjoxNzkxMjk2Nzk1fQ.uUL60gYi9CFW7am3yXypOj9slc1Fcdkt0XIu1XqwH60
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTM4MDI4MiwiZXhwIjoxNzkxMzgwNTgyfQ.KAcRy9D_QNcpcBm3YdSOwJLI0mb7_si3LTWIkGvzDas
+
+### Modifier le profil
+PUT http://localhost:5000/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTM2Mjc0NSwiZXhwIjoxNzkxMzY2MzQ1fQ.NXWcBNdkhnqGGWxOCVoF6bnyjRa5rFMgNovi5adD24M
+Content-Type: application/json
+
+{
+    "email": "test@projet-spe4.fr",
+    "firstName": "Alban",
+    "lastName": "Modifie"
+}
+
+### Modifier le mot de passe
+PUT http://localhost:5000/api/auth/password
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTM3OTc0MiwiZXhwIjoxNzkxMzgwMDQyfQ.B-4938gMHpdPMn9_XZEdQjciblNkGfbTeB1l1vWNMto
+Content-Type: application/json
+
+{
+    "currentPassword": "NouveauMotDePasse789!",
+    "newPassword": "NouveauMotDePasse101112!"
+}
+
+### Préparer la 2FA
+POST http://localhost:5000/api/auth/2fa/setup
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTM2NzQxMywiZXhwIjoxNzkxMzcxMDEzfQ.gpPiJ6Z4BsjJ2A5vGQQySZba82SFqEOjhMutuOG5qaw
+
+### Vérifier le code 2FA
+POST http://localhost:5000/api/auth/2fa/verify
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTM3ODU3MywiZXhwIjoxNzkxMzgyMTczfQ.vZ8fbEHnFjGShnImLB3OQwDH__2BtjTKbARCj7HgvxY
+Content-Type: application/json
+
+{
+    "code": "831721"
+}
+
+
+### Validation du 2FA lors de la connexion
+POST http://localhost:5000/api/auth/2fa/login
+Content-Type: application/json
+
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTM3OTAzNiwiZXhwIjoxNzkxMzc5MzM2fQ.sbDTPpEckm8glFr3ETaLN71pruHdwWmD_Aq79ayQA0I",
+    "code": "540712"
+}
 
 ### Déconnexion
 POST http://localhost:5000/api/auth/logout
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTI5MzE5NSwiZXhwIjoxNzkxMjk2Nzk1fQ.uUL60gYi9CFW7am3yXypOj9slc1Fcdkt0XIu1XqwH60
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTM2Mjc0NSwiZXhwIjoxNzkxMzY2MzQ1fQ.NXWcBNdkhnqGGWxOCVoF6bnyjRa5rFMgNovi5adD24M
