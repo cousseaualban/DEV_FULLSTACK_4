@@ -119,14 +119,14 @@ La répartition ci-dessous attribue un responsable principal à chaque lot. Elle
 
 ## Membres du groupe
 
-- **Personne 1 :** __________________________
-- **Personne 2 :** __________________________
-- **Personne 3 :** __________________________
-- **Personne 4 :** __________________________
-- **Personne 5 :** __________________________
+- **Personne 1 :** Alban COUSSEAU
+- **Personne 2 :** Lorenzo PORRETTI
+- **Personne 3 :** Nguyen
+- **Personne 4 :** Ilef BELAED
+- **Personne 5 :** Sam DRONNEAU
 
 ## Informations à compléter
 
 - Technologies retenues : __________________________
-- Rôle du serveur 1 : __________________________
-- Rôle du serveur 2 : __________________________
+- Rôle du serveur 1 : Backend // Express
+- Rôle du serveur 2 : Frontend // Vue avec TypeScript
