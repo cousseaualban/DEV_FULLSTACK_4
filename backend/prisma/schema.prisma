@@ -12,15 +12,98 @@ enum UserRole {
 }
 
 model User {
-  id                Int      @id @default(autoincrement())
-  email             String   @unique
-  passwordHash      String
-  firstName         String
-  lastName          String
-  role              UserRole @default(USER)
-  isBlocked         Boolean  @default(false)
-  twoFactorEnabled  Boolean  @default(false)
-  twoFactorSecret   String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               Int      @id @default(autoincrement())
+  email            String   @unique
+  passwordHash     String
+  firstName        String
+  lastName         String
+  role             UserRole @default(USER)
+  isBlocked        Boolean  @default(false)
+  twoFactorEnabled Boolean  @default(false)
+  twoFactorSecret  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  ownedFolders        Folder[]             @relation("FolderOwner")
+  ownedDocuments      Document[]           @relation("DocumentOwner")
+  modifiedDocuments   Document[]           @relation("DocumentLastModifiedBy")
+  uploadedFiles       File[]               @relation("FileUploader")
+  documentPermissions DocumentPermission[]
+}
+
+model Folder {
+  id        Int      @id @default(autoincrement())
+  name      String
+  ownerId   Int
+  parentId  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner     User       @relation("FolderOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  parent    Folder?    @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Folder[]   @relation("FolderHierarchy")
+  documents Document[]
+
+  @@index([ownerId])
+  @@index([parentId])
+}
+
+model Document {
+  id               Int      @id @default(autoincrement())
+  name             String
+  ownerId          Int
+  folderId         Int?
+  lastModifiedById Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  owner          User                 @relation("DocumentOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  folder         Folder?              @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  lastModifiedBy User?                @relation("DocumentLastModifiedBy", fields: [lastModifiedById], references: [id], onDelete: SetNull)
+  files          File[]
+  permissions    DocumentPermission[]
+
+  @@index([ownerId])
+  @@index([folderId])
+  @@index([lastModifiedById])
+}
+
+model File {
+  id           Int      @id @default(autoincrement())
+  documentId   Int
+  originalName String
+  storedName   String   @unique
+  storagePath  String
+  mimeType     String
+  size         Int
+  uploadedById Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  uploadedBy User?    @relation("FileUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([documentId])
+  @@index([uploadedById])
+}
+
+enum DocumentPermissionLevel {
+  READ
+  WRITE
+  DELETE
+}
+
+model DocumentPermission {
+  id         Int                     @id @default(autoincrement())
+  documentId Int
+  userId     Int
+  level      DocumentPermissionLevel
+  createdAt  DateTime                @default(now())
+  updatedAt  DateTime                @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, userId])
+  @@index([userId])
 }
