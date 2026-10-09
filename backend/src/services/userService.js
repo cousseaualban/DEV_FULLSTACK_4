@@ -71,6 +71,39 @@ const getUserById = async (id) => {
   });
 };
 
+const getAllUsers = async () => {
+    return prisma.user.findMany({
+        select: userSelect,
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+};
+
+const setUserBlocked = async (id, isBlocked) => {
+    return prisma.user.update({
+        where: {
+            id
+        },
+        data: {
+            isBlocked
+        },
+        select: userSelect
+    });
+};
+
+const setUserRole = async (id, role) => {
+    return prisma.user.update({
+        where: {
+            id
+        },
+        data: {
+            role
+        },
+        select: userSelect
+    });
+};
+
 const getUserTwoFactorSecret = async (id) => {
     return prisma.user.findUnique({
         where: {
@@ -136,6 +169,9 @@ module.exports = {
   getUserByEmailWithPassword,
   getUserByIdWithPassword,
   getUserById,
+  getAllUsers,
+  setUserBlocked,
+  setUserRole,
   getUserTwoFactorSecret,
   updateUser,
   updatePassword,

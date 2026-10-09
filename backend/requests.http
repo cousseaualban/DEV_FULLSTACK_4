@@ -1,81 +1,13 @@
 ### Vérifier que le backend fonctionne
 GET http://localhost:5000/api/health
 
-
-### Inscription - nouvel utilisateur
-POST http://localhost:5000/api/auth/register
-Content-Type: application/json
-
-{
-    "email": "test3@projet-spe4.fr",
-    "password": "MotDePasse789!",
-    "firstName": "Pierre",
-    "lastName": "Test"
-}
-
-
-### Inscription - adresse e-mail déjà utilisée
-POST http://localhost:5000/api/auth/register
-Content-Type: application/json
-
-{
-    "email": "test@projet-spe4.fr",
-    "password": "NouveauMotDePasse123!",
-    "firstName": "Autre",
-    "lastName": "Test"
-}
-
-### Inscription - champs obligatoires
-POST http://localhost:5000/api/auth/register
-Content-Type: application/json
-
-{
-    "email": "test4@projet-spe4.fr",
-    "password": "",
-    "firstName": "Test",
-    "lastName": "Validation"
-}
-
-### Inscription - e-mail invalide
-POST http://localhost:5000/api/auth/register
-Content-Type: application/json
-
-{
-    "email": "email-invalide",
-    "password": "MotDePasse123!",
-    "firstName": "Test",
-    "lastName": "Validation"
-}
-
-### Inscription - mot de passe trop court
-POST http://localhost:5000/api/auth/register
-Content-Type: application/json
-
-{
-    "email": "test5@projet-spe4.fr",
-    "password": "1234567",
-    "firstName": "Test",
-    "lastName": "Validation"
-}
-
-### Inscription - prénom vide
-POST http://localhost:5000/api/auth/register
-Content-Type: application/json
-
-{
-    "email": "test6@projet-spe4.fr",
-    "password": "MotDePasse123!",
-    "firstName": "   ",
-    "lastName": "Validation"
-}
-
 ### Connexion - identifiants corrects
 POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-    "email": "test@projet-spe4.fr",
-    "password": "NouveauMotDePasse101112!"
+    "email": "admin-create@test.fr",
+    "password": "MotDePasse123"
 }
 
 
@@ -113,7 +45,7 @@ GET http://localhost:5000/api/auth/me
 
 ### Accéder au profil - avec token
 GET http://localhost:5000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTM4MDI4MiwiZXhwIjoxNzkxMzgwNTgyfQ.KAcRy9D_QNcpcBm3YdSOwJLI0mb7_si3LTWIkGvzDas
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTQ0NzQ4NiwiZXhwIjoxNzkxNDQ3Nzg2fQ.mH9BWr3HG5llOCwml75LGAYwuBn166f7IbtV_fIyv1k
 
 ### Modifier le profil
 PUT http://localhost:5000/api/auth/me
@@ -157,6 +89,58 @@ Content-Type: application/json
 {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTM3OTAzNiwiZXhwIjoxNzkxMzc5MzM2fQ.sbDTPpEckm8glFr3ETaLN71pruHdwWmD_Aq79ayQA0I",
     "code": "540712"
+}
+
+### Connexion - accès administrateur
+GET http://localhost:5000/api/admin/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTQ0NzkxOCwiZXhwIjoxNzkxNDQ4MjE4fQ.epiGAtyW2Paubf-MZs5wY3xCZUZxLMEb996vskioQts
+
+### Bloquer l'utilisateur
+PUT http://localhost:5000/api/admin/users/3/block
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTQ0NzkxOCwiZXhwIjoxNzkxNDQ4MjE4fQ.epiGAtyW2Paubf-MZs5wY3xCZUZxLMEb996vskioQts
+Content-Type: application/json
+
+{
+    "isBlocked": true
+}
+
+### Débloquer l'utilisateur
+PUT http://localhost:5000/api/admin/users/3/block
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTQ0NzkxOCwiZXhwIjoxNzkxNDQ4MjE4fQ.epiGAtyW2Paubf-MZs5wY3xCZUZxLMEb996vskioQts
+Content-Type: application/json
+
+{
+    "isBlocked": false
+}
+
+### Passer en administrateur
+PUT http://localhost:5000/api/admin/users/3/role
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTQ0ODM1NiwiZXhwIjoxNzkxNDQ4NjU2fQ.9-BN20bSCEKVE7BIt2MGAJT5EAnFlLUd6GgSep_8kwY
+Content-Type: application/json
+
+{
+    "role": "ADMIN"
+}
+
+### Repasser en utilisateur
+PUT http://localhost:5000/api/admin/users/3/role
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTQ0ODM1NiwiZXhwIjoxNzkxNDQ4NjU2fQ.9-BN20bSCEKVE7BIt2MGAJT5EAnFlLUd6GgSep_8kwY
+Content-Type: application/json
+
+{
+    "role": "USER"
+}
+
+### Création d'un compte par un administrateur
+POST http://localhost:5000/api/admin/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQsImlhdCI6MTc5MTQ0OTIxMSwiZXhwIjoxNzkxNDUyODExfQ.HN_YzwzVLlxNvSaPLKZwfPGohzwLVcef7TkNwWPD8ss
+Content-Type: application/json
+
+{
+    "email": "admin-create@test.fr",
+    "password": "MotDePasse123",
+    "firstName": "Compte",
+    "lastName": "Admin"
 }
 
 ### Déconnexion
