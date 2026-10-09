@@ -185,7 +185,7 @@ const setPermission = async (req, res) => {
     const access = await getDocumentAccess(parseId(req.params.id), req.user.id);
     if (!access) return res.status(404).json({ message: 'Document introuvable' });
     if (access.level !== 'OWNER') return res.status(403).json({ message: 'Seul le propriétaire peut gérer les droits' });
-    const userId = parseId(req.body.userId);
+    const userId = parseId(req.params.userId || req.body.userId);
     const level = req.body.level;
     if (!userId || !['READ', 'WRITE', 'DELETE'].includes(level)) return res.status(400).json({ message: 'Utilisateur ou niveau de droit invalide' });
     if (userId === req.user.id) return res.status(400).json({ message: 'Le propriétaire possède déjà tous les droits' });
