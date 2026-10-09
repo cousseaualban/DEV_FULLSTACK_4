@@ -4,7 +4,7 @@ const upload = require('../middlewares/uploadMiddleware');
 const {
     listDocuments, createDocument, getDocument, updateDocument, deleteDocument,
     listFiles, addFile, replaceFile, downloadFile, deleteFile,
-    listPermissions, setPermission, removePermission
+    listPermissions, listCollaborators, setPermission, removePermission
 } = require('../controllers/documentController');
 
 const router = express.Router();
@@ -12,6 +12,7 @@ router.use(authenticateToken);
 
 router.get('/', listDocuments);
 router.post('/', createDocument);
+router.get('/:id/collaborators', listCollaborators);
 router.get('/:id', getDocument);
 router.patch('/:id', updateDocument);
 router.delete('/:id', deleteDocument);

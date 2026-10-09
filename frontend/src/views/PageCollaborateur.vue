@@ -79,6 +79,7 @@ function endCall() {
   >
     <ListeCollaborateur
       :call-state="callState"
+      document-id="1"
       @update:callState="callState = $event"
     />
   </RightDrawer>
