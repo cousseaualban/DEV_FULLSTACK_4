@@ -2,7 +2,11 @@ const {
     verifyToken
 } = require('../services/tokenService');
 
-const authenticateToken = (req, res, next) => {
+const {
+    getUserById
+} = require('../services/userService');
+
+const authenticateToken = async (req, res, next) => {
     const authorization = req.headers.authorization;
 
     if (!authorization) {
@@ -22,8 +26,19 @@ const authenticateToken = (req, res, next) => {
     try {
         const decodedToken = verifyToken(token);
 
+        const user = await getUserById(
+            decodedToken.userId
+        );
+
+        if (!user) {
+            return res.status(401).json({
+                message: 'Utilisateur introuvable'
+            });
+        }
+
         req.user = {
-            id: decodedToken.userId
+            id: user.id,
+            role: user.role
         };
 
         next();

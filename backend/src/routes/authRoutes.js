@@ -1,7 +1,6 @@
 const express = require('express');
 
 const {
-    register,
     login,
     loginTwoFactor,
     changePassword,
@@ -19,7 +18,6 @@ const {authenticateToken} = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
-router.post('/register', register);
 router.post('/login', login);
 router.post('/2fa/login', loginTwoFactor);
 router.get('/me', authenticateToken, getCurrentUser);
