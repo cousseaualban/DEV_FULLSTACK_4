@@ -8,3 +8,7 @@
 </template>
 
 <style scoped></style>
+
+<template>
+  <RouterView />
+</template>
