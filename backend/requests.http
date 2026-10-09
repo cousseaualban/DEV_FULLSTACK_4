@@ -7,7 +7,7 @@ Content-Type: application/json
 
 {
     "email": "admin-create@test.fr",
-    "password": "MotDePasse123"
+    "password": "Test1234!"
 }
 
 
@@ -45,27 +45,27 @@ GET http://localhost:5000/api/auth/me
 
 ### Accéder au profil - avec token
 GET http://localhost:5000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTQ0NzQ4NiwiZXhwIjoxNzkxNDQ3Nzg2fQ.mH9BWr3HG5llOCwml75LGAYwuBn166f7IbtV_fIyv1k
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQsImlhdCI6MTc5MTU0OTMzNCwiZXhwIjoxNzkxNTUyOTM0fQ.cQH_V1clRPNhUaGnTKCfZq8nxS8CEBlpXw9cNeLtEpI
 
 ### Modifier le profil
 PUT http://localhost:5000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTM2Mjc0NSwiZXhwIjoxNzkxMzY2MzQ1fQ.NXWcBNdkhnqGGWxOCVoF6bnyjRa5rFMgNovi5adD24M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQsImlhdCI6MTc5MTU0OTkxOSwiZXhwIjoxNzkxNTUzNTE5fQ.iGDEuEVw9o8in6r9rkzAfOdh9B8d8tdF7hAN2p34QlQ
 Content-Type: application/json
 
 {
-    "email": "test@projet-spe4.fr",
+    "email": "admin-create@test.fr",
     "firstName": "Alban",
-    "lastName": "Modifie"
+    "lastName": "COUSSEAU"
 }
 
 ### Modifier le mot de passe
 PUT http://localhost:5000/api/auth/password
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR3b0ZhY3RvclBlbmRpbmciOnRydWUsImlhdCI6MTc5MTM3OTc0MiwiZXhwIjoxNzkxMzgwMDQyfQ.B-4938gMHpdPMn9_XZEdQjciblNkGfbTeB1l1vWNMto
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQsImlhdCI6MTc5MTU0OTMzNCwiZXhwIjoxNzkxNTUyOTM0fQ.cQH_V1clRPNhUaGnTKCfZq8nxS8CEBlpXw9cNeLtEpI
 Content-Type: application/json
 
 {
-    "currentPassword": "NouveauMotDePasse789!",
-    "newPassword": "NouveauMotDePasse101112!"
+    "currentPassword": "MotDePasse123!",
+    "newPassword": "MotDePasse123!!"
 }
 
 ### Préparer la 2FA
@@ -162,15 +162,15 @@ Content-Type: application/json
 
 ### Test réel - récupérer les collaborateurs du document
 GET http://localhost:5000/api/documents/1/collaborators
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTU1MDc3NywiZXhwIjoxNzkxNTU0Mzc3fQ.-s_rt9JRAcK95arZntEyPtemMpbXIDtEt2AJBcMNu9w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTU1NjMwNywiZXhwIjoxNzkxNTU5OTA3fQ.z6ypU73dzcltWJK6jcabjecYl01fOO_lXj4BZwwhvIU
 
 ### Test réel - recherche d’utilisateur pour invitation
 GET http://localhost:5000/api/users?q=alice
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTU1MDc3NywiZXhwIjoxNzkxNTU0Mzc3fQ.-s_rt9JRAcK95arZntEyPtemMpbXIDtEt2AJBcMNu9w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTU1NjMwNywiZXhwIjoxNzkxNTU5OTA3fQ.z6ypU73dzcltWJK6jcabjecYl01fOO_lXj4BZwwhvIU
 
 ### Test réel - ajouter un utilisateur comme collaborateur
 PUT http://localhost:5000/api/documents/1/permissions/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTU1MDc3NywiZXhwIjoxNzkxNTU0Mzc3fQ.-s_rt9JRAcK95arZntEyPtemMpbXIDtEt2AJBcMNu9w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTU1NjMwNywiZXhwIjoxNzkxNTU5OTA3fQ.z6ypU73dzcltWJK6jcabjecYl01fOO_lXj4BZwwhvIU
 Content-Type: application/json
 
 {

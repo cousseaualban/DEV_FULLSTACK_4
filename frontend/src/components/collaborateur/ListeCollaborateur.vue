@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import InviteCollaboratorModal from '../invitation/InviteCollaboratorModal.vue'
 import { collaboratorService, type UserWithRole } from '../../services/collaboratorService'
+import { callState, setCallState, clearCallState } from '../../stores/callStore'
 
 type CallState = {
   collaboratorId: string
@@ -11,7 +12,6 @@ type CallState = {
 
 const props = withDefaults(
   defineProps<{
-    callState: CallState | null
     documentId?: string
   }>(),
   {
@@ -19,15 +19,22 @@ const props = withDefaults(
   }
 )
 
-const emit = defineEmits<{
-  'update:callState': [state: CallState | null]
-}>()
-
 const showInviteModal = ref(false)
 const usersWithRole = ref<UserWithRole[]>([])
+const isLoading = ref(true)
+const errorMessage = ref('')
 
 async function refreshCollaborators() {
-  usersWithRole.value = await collaboratorService.getCollaboratorsByDocument(props.documentId)
+  errorMessage.value = ''
+  try {
+    usersWithRole.value = await collaboratorService.getCollaboratorsByDocument(props.documentId)
+  } catch (err) {
+    console.error('Erreur getCollaboratorsByDocument', err)
+
+    const message = err instanceof Error ? err.message : 'Erreur inconnue'
+    errorMessage.value = message
+    usersWithRole.value = []
+  }
 }
 
 function openInviteModal() {
@@ -36,8 +43,7 @@ function openInviteModal() {
 
 function callCollaborator(collaboratorId: string) {
   const user = usersWithRole.value.find((item) => item.id === collaboratorId)
-
-  emit('update:callState', {
+  setCallState({
     collaboratorId,
     collaboratorName: user?.name ?? 'Collaborateur',
     mode: 'outgoing',
@@ -47,8 +53,7 @@ function callCollaborator(collaboratorId: string) {
 
 function simulateIncomingCall(collaboratorId: string) {
   const user = usersWithRole.value.find((item) => item.id === collaboratorId)
-
-  emit('update:callState', {
+  setCallState({
     collaboratorId,
     collaboratorName: user?.name ?? 'Collaborateur',
     mode: 'incoming',
@@ -57,17 +62,17 @@ function simulateIncomingCall(collaboratorId: string) {
 }
 
 function acceptIncomingCall() {
-  if (!props.callState) return
+  if (!callState.value) return
 
-  emit('update:callState', {
-    collaboratorId: props.callState.collaboratorId,
-    collaboratorName: props.callState.collaboratorName,
+  setCallState({
+    collaboratorId: callState.value.collaboratorId,
+    collaboratorName: callState.value.collaboratorName,
     mode: 'outgoing',
   })
 }
 
 function cancelCall() {
-  emit('update:callState', null)
+  setCallState(null)
 }
 
 async function addCollaborators(newCollaborators: UserWithRole[]) {
@@ -90,9 +95,8 @@ async function removeCollaborator(collaboratorId: string) {
   })
 
   await refreshCollaborators()
-
-  if (props.callState?.collaboratorId === collaboratorId) {
-    emit('update:callState', null)
+  if (callState.value?.collaboratorId === collaboratorId) {
+    setCallState(null)
   }
 }
 
@@ -119,7 +123,12 @@ function getRoleLabel(role: UserWithRole['role']) {
 }
 
 onMounted(async () => {
-  await refreshCollaborators()
+  isLoading.value = true
+  try {
+    await refreshCollaborators()
+  } finally {
+    isLoading.value = false
+  }
 })
 </script>
 
@@ -136,10 +145,13 @@ onMounted(async () => {
     <InviteCollaboratorModal
       :open="showInviteModal"
       :document-id="props.documentId"
-      :already-invited-user-ids="usersWithRole.map((user) => user.userId)"
+        :already-invited-user-ids="usersWithRole.map((user) => user.userId)"
       @close="showInviteModal = false"
       @invite="addCollaborators"
     />
+
+      <div v-if="isLoading" class="mt-4 text-sm text-slate-500">Chargement...</div>
+      <div v-else-if="errorMessage" class="mt-4 text-sm text-red-600">{{ errorMessage }}</div>
 
     <div class="mt-4 overflow-hidden rounded-md border border-gray-200">
       <table class="w-full">
@@ -194,10 +206,10 @@ onMounted(async () => {
                 <button
                   type="button"
                   class="rounded bg-green-600 px-3 py-1.5 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-green-400"
-                  :disabled="props.callState?.collaboratorId === user.id"
+                  :disabled="callState?.collaboratorId === user.id"
                   @click="callCollaborator(user.id)"
                 >
-                  {{ props.callState?.collaboratorId === user.id ? 'Appel...' : 'Appeler' }}
+                  {{ callState?.collaboratorId === user.id ? 'Appel...' : 'Appeler' }}
                 </button>
 
                 <button

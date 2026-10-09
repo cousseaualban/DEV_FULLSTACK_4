@@ -22,7 +22,7 @@ export type UserSearchResult = {
 const DEFAULT_DOCUMENT_ID = String(import.meta.env.VITE_DEFAULT_DOCUMENT_ID ?? '1')
 
 function getAuthToken(): string {
-  return localStorage.getItem('authToken') ?? localStorage.getItem('token') ?? ''
+  return localStorage.getItem('token') ?? localStorage.getItem('authToken') ?? ''
 }
 
 async function ensureAuthToken(): Promise<string> {
@@ -55,6 +55,7 @@ async function ensureAuthToken(): Promise<string> {
     throw new Error('Le backend n’a pas renvoyé de token')
   }
 
+  localStorage.setItem('token', token)
   localStorage.setItem('authToken', token)
   return token
 }
@@ -71,6 +72,7 @@ async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T
 
   const response = await fetch(`/api${path}`, {
     ...options,
+    cache: 'no-store',
     headers,
   })
 
