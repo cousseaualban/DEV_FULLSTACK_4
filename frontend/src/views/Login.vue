@@ -2,12 +2,15 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { apiRequest } from '../services/api'
 
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
+const twoFactorRequired = ref(false)
+const twoFactorCode = ref('')
+const twoFactorToken = ref('')
 const router = useRouter()
-
 
 const login = async () => {
   if (!email.value.trim() || !password.value.trim()) {
@@ -20,37 +23,65 @@ const login = async () => {
     return
   }
 
-  if (password.value.length < 8) {
-    errorMessage.value = 'Le mot de passe doit contenir au minimum 8 caractères.'
-    return
-  }
-
-  if (!/[A-Z]/.test(password.value)) {
-    errorMessage.value = 'Le mot de passe doit contenir au moins une majuscule.'
-    return
-  }
-
-  if (!/[0-9]/.test(password.value)) {
-    errorMessage.value = 'Le mot de passe doit contenir au moins un chiffre.'
-    return
-  }
-
-  if (!/[!@#$%^&*(),.?":{}|<>_\-]/.test(password.value)) {
-    errorMessage.value = 'Le mot de passe doit contenir au moins un caractère spécial.'
-    return
-  }
-
   errorMessage.value = ''
 
   try {
-    localStorage.setItem('isAuthenticated', 'true')
-    localStorage.setItem('user', JSON.stringify({
-      email: email.value.trim()
-    }))
+    const data = await apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: email.value.trim(),
+        password: password.value
+      })
+    })
 
+    if (data.twoFactorRequired) {
+      twoFactorRequired.value = true
+      twoFactorToken.value = data.token
+      errorMessage.value = ''
+      return
+    }
+
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('user', JSON.stringify(data.user))
+    localStorage.setItem('isAuthenticated', 'true')
+
+    sessionStorage.setItem('connexionReussie', 'true')
     await router.push('/documents')
   } catch (error) {
-    errorMessage.value = 'Une erreur est survenue. Veuillez réessayer.'
+    errorMessage.value = error instanceof Error
+      ? error.message
+      : 'Une erreur est survenue. Veuillez réessayer.'
+  }
+}
+
+
+const loginTwoFactor = async () => {
+  errorMessage.value = ''
+
+  if (!/^\d{6}$/.test(twoFactorCode.value)) {
+    errorMessage.value = 'Veuillez saisir un code valide à 6 chiffres.'
+    return
+  }
+
+  try {
+    const data = await apiRequest('/auth/2fa/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        token: twoFactorToken.value,
+        code: twoFactorCode.value
+      })
+    })
+
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('user', JSON.stringify(data.user))
+    localStorage.setItem('isAuthenticated', 'true')
+
+    sessionStorage.setItem('connexionReussie', 'true')
+    await router.push('/documents')
+  } catch (error) {
+    errorMessage.value = error instanceof Error
+      ? error.message
+      : 'Impossible de vérifier le code 2FA.'
   }
 }
 </script>
@@ -73,44 +104,46 @@ const login = async () => {
 
       <div class="bg-white rounded-2xl shadow-lg p-8">
 
-        <form class="space-y-5">
+        <form class="space-y-5" @submit.prevent="twoFactorRequired ? loginTwoFactor() : login()">
 
-          <div>
-            <label
-              for="email"
-              class="block text-sm font-medium text-slate-700 mb-2"
-            >
-              Adresse e-mail
-            </label>
+          <div v-if="!twoFactorRequired">
+            <div>
+              <label
+                for="email"
+                class="block text-sm font-medium text-slate-700 mb-2"
+              >
+                Adresse e-mail
+              </label>
 
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              placeholder="votre@email.com"
-              class="w-full px-4 py-3 rounded-lg border border-slate-300
-                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:border-blue-500"
-            />
-          </div>
+              <input
+                id="email"
+                v-model="email"
+                type="email"
+                placeholder="votre@email.com"
+                class="w-full px-4 py-3 rounded-lg border border-slate-300
+                      focus:outline-none focus:ring-2 focus:ring-blue-500
+                      focus:border-blue-500"
+              />
+            </div>
 
-          <div>
-            <label
-              for="password"
-              class="block text-sm font-medium text-slate-700 mb-2"
-            >
-              Mot de passe
-            </label>
+            <div>
+              <label
+                for="password"
+                class="block text-sm font-medium text-slate-700 mb-2"
+              >
+                Mot de passe
+              </label>
 
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              placeholder="Votre mot de passe"
-              class="w-full px-4 py-3 rounded-lg border border-slate-300
-                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:border-blue-500"
-            />
+              <input
+                id="password"
+                v-model="password"
+                type="password"
+                placeholder="Votre mot de passe"
+                class="w-full px-4 py-3 rounded-lg border border-slate-300
+                      focus:outline-none focus:ring-2 focus:ring-blue-500
+                      focus:border-blue-500"
+              />
+            </div>
           </div>
 
           <div
@@ -138,7 +171,33 @@ const login = async () => {
             </p>
           </div>
 
-          <div class="text-right">
+          <div v-if="twoFactorRequired">
+            <p class="mb-4 text-sm text-slate-600">
+              Saisissez le code à 6 chiffres affiché dans Microsoft Authenticator.
+            </p>
+
+            <label
+              for="twoFactorCode"
+              class="block text-sm font-medium text-slate-700 mb-2"
+            >
+              Code de vérification
+            </label>
+
+            <input
+              id="twoFactorCode"
+              v-model="twoFactorCode"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="6"
+              placeholder="123456"
+              class="w-full px-4 py-3 rounded-lg border border-slate-300
+                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                    focus:border-blue-500"
+            />
+          </div>
+
+          <div v-if="!twoFactorRequired" class="text-right">
             <a
               href="#"
               class="text-sm text-blue-600 hover:text-blue-700"
@@ -148,14 +207,12 @@ const login = async () => {
           </div>
 
           <button
-            type="button"
-            @click="login"
+            type="submit"
             class="w-full bg-blue-600 text-white py-3 rounded-lg
-                   font-medium hover:bg-blue-700 transition"
+                  font-medium hover:bg-blue-700 transition"
           >
-            Se connecter
+            {{ twoFactorRequired ? 'Vérifier le code' : 'Se connecter' }}
           </button>
-
         </form>
 
       </div>

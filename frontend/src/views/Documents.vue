@@ -1,6 +1,16 @@
 
 <template>
   <div class="min-h-screen bg-slate-50">
+    <div
+      v-if="showLoginSuccess"
+      class="fixed top-5 right-5 z-50 rounded-xl border border-green-200
+            bg-green-50 px-5 py-4 text-sm font-medium text-green-800
+            shadow-lg"
+      role="status"
+    >
+      <span class="mr-2">✓</span>
+      Connexion réussie !
+    </div>
     <div class="max-w-7xl mx-auto px-14 py-8">
 
       <!-- En-tête -->
@@ -397,6 +407,17 @@ const itemName = ref('')
 const itemError = ref('')
 const itemInput = ref(null)
 
+const showLoginSuccess = ref(false)
+
+if (sessionStorage.getItem('connexionReussie') === 'true') {
+  sessionStorage.removeItem('connexionReussie')
+  showLoginSuccess.value = true
+
+  setTimeout(() => {
+    showLoginSuccess.value = false
+  }, 3000)
+}
+
 const folders = ref([])
 const documents = ref([])
 
@@ -617,13 +638,25 @@ function formatDate(dateValue) {
 }
 
 // Déconnexion
-function logout() {
+async function logout() {
   showProfileMenu.value = false
 
-  localStorage.removeItem('user')
-  localStorage.removeItem('isAuthenticated')
+  try {
+    await fetch('http://localhost:5000/api/auth/logout', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+  } catch (error) {
+    console.error('Erreur lors de la déconnexion :', error)
+  } finally {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('isAuthenticated')
 
-  router.push('/login')
+    router.push('/login')
+  }
 }
 
 watch(
