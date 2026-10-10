@@ -42,6 +42,7 @@ const login = async () => {
     }
 
     localStorage.setItem('token', data.token)
+    localStorage.setItem('authToken', data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
     localStorage.setItem('isAuthenticated', 'true')
 
@@ -73,6 +74,7 @@ const loginTwoFactor = async () => {
     })
 
     localStorage.setItem('token', data.token)
+    localStorage.setItem('authToken', data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
     localStorage.setItem('isAuthenticated', 'true')
 

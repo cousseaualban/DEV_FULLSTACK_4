@@ -1,5 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import ListeCollaborateur from '@/components/collaborateur/ListeCollaborateur.vue'
+import RightDrawer from '@/components/common/RightDrawer.vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 const saveStatus = ref('Enregistré')
@@ -7,8 +9,10 @@ const saveStatus = ref('Enregistré')
 const documentTitle = ref('Document de travail')
 const documentContent = ref('')
 const lastModified = ref('')
+const showRightMenu = ref(false)
 
 const route = useRoute()
+const currentDocumentId = computed(() => String(route.query.documentId ?? '1'))
 
 const STORAGE_KEY = route.query.document || 'document-racine'
 const isLoading = ref(true)
@@ -212,6 +216,7 @@ const handleContentChange = () => {
               </div>
 
               <button
+                type="button"
                 class="px-4 py-2.5
                        rounded-xl
                        border border-slate-200
@@ -220,8 +225,9 @@ const handleContentChange = () => {
                        text-slate-700
                        hover:bg-slate-50
                        transition"
+                @click="showRightMenu = true"
               >
-                Partager
+                Collaborateurs
               </button>
 
             </div>
@@ -403,4 +409,13 @@ const handleContentChange = () => {
     </div>
 
   </div>
+  <RightDrawer
+    :open="showRightMenu"
+    title="Liste des collaborateurs"
+    @close="showRightMenu = false"
+  >
+    <ListeCollaborateur
+      :document-id="currentDocumentId"
+    />
+  </RightDrawer>
 </template>

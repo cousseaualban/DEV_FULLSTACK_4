@@ -1,7 +1,7 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
 
-import Login from '../views/login.vue'
+import Login from '../views/Login.vue'
 import Profile from '../views/Profile.vue'
 import Documents from '../views/Documents.vue'
 import Folder from '../views/Folder.vue'

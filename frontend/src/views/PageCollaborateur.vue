@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import RightDrawer from '../components/common/RightDrawer.vue'
 import ListeCollaborateur from '@/components/collaborateur/ListeCollaborateur.vue'
-import CallPopup from '@/components/call/CallPopup.vue'
+import { collaboratorService } from '../services/collaboratorService'
+import { callState, setCallState, clearCallState } from '../stores/callStore'
 
 type CallState = {
   collaboratorId: string
@@ -10,42 +12,62 @@ type CallState = {
   mode: 'outgoing' | 'incoming'
 }
 
+const route = useRoute()
+const currentDocumentId = computed(() => String(route.query.documentId ?? '1'))
 const showRightMenu = ref(false)
-const incomingCallerName = ref('Alice Martin')
-const incomingCallerId = ref('c1')
-const callState = ref<CallState | null>(null)
 
-function simulateIncomingCall() {
-  callState.value = {
-    collaboratorId: incomingCallerId.value,
-    collaboratorName: incomingCallerName.value,
-    mode: 'incoming',
+async function simulateIncomingCall() {
+  try {
+    const collaborators = await collaboratorService.getCollaboratorsByDocument(currentDocumentId.value)
+    const firstCollaborator = collaborators[0]
+
+    if (!firstCollaborator) {
+      setCallState({
+        collaboratorId: '1',
+        collaboratorName: 'Utilisateur connecté',
+        mode: 'incoming',
+      })
+      return
+    }
+
+    setCallState({
+      collaboratorId: String(firstCollaborator.userId ?? firstCollaborator.id),
+      collaboratorName: firstCollaborator.name || firstCollaborator.email || 'Collaborateur',
+      mode: 'incoming',
+    })
+  } catch (error) {
+    console.error('Erreur lors de la simulation d’appel entrant :', error)
+    setCallState({
+      collaboratorId: '1',
+      collaboratorName: 'Utilisateur connecté',
+      mode: 'incoming',
+    })
   }
 }
 
 function acceptIncomingCall() {
   if (!callState.value) {
-    callState.value = {
-      collaboratorId: incomingCallerId.value,
-      collaboratorName: incomingCallerName.value,
+    setCallState({
+      collaboratorId: '1',
+      collaboratorName: 'Utilisateur connecté',
       mode: 'outgoing',
-    }
+    })
     return
   }
 
-  callState.value = {
+  setCallState({
     collaboratorId: callState.value.collaboratorId,
     collaboratorName: callState.value.collaboratorName,
     mode: 'outgoing',
-  }
+  })
 }
 
 function refuseIncomingCall() {
-  callState.value = null
+  clearCallState()
 }
 
 function endCall() {
-  callState.value = null
+  clearCallState()
 }
 </script>
 
@@ -78,15 +100,8 @@ function endCall() {
     @close="showRightMenu = false"
   >
     <ListeCollaborateur
-      :call-state="callState"
-      @update:callState="callState = $event"
+      :document-id="currentDocumentId"
     />
   </RightDrawer>
 
-  <CallPopup
-    :call-state="callState"
-    @accept="acceptIncomingCall"
-    @refuse="refuseIncomingCall"
-    @end="endCall"
-  />
 </template>

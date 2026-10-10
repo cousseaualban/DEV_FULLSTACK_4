@@ -181,6 +181,48 @@ const listPermissions = async (req, res) => {
     res.json({ permissions });
 };
 
+const listCollaborators = async (req, res) => {
+    const access = await getDocumentAccess(parseId(req.params.id), req.user.id);
+    if (!access) return res.status(404).json({ message: 'Document introuvable' });
+    if (!hasPermission(access, 'READ')) return res.status(403).json({ message: 'Accès refusé' });
+
+    const document = await prisma.document.findUnique({
+        where: { id: access.document.id },
+        include: {
+            owner: { select: { id: true, email: true, firstName: true, lastName: true } },
+            permissions: {
+                orderBy: { createdAt: 'asc' },
+                include: { user: { select: { id: true, email: true, firstName: true, lastName: true } } }
+            }
+        }
+    });
+
+    const users = [
+        {
+            id: document.owner.id,
+            userId: document.owner.id,
+            firstName: document.owner.firstName,
+            lastName: document.owner.lastName,
+            name: `${document.owner.firstName} ${document.owner.lastName}`.trim(),
+            email: document.owner.email,
+            role: 'owner',
+            status: 'active'
+        },
+        ...document.permissions.map((permission) => ({
+            id: permission.user.id,
+            userId: permission.user.id,
+            firstName: permission.user.firstName,
+            lastName: permission.user.lastName,
+            name: `${permission.user.firstName} ${permission.user.lastName}`.trim(),
+            email: permission.user.email,
+            role: permission.level === 'READ' ? 'viewer' : 'editor',
+            status: 'active'
+        }))
+    ];
+
+    res.json({ users, collaborators: users });
+};
+
 const setPermission = async (req, res) => {
     const access = await getDocumentAccess(parseId(req.params.id), req.user.id);
     if (!access) return res.status(404).json({ message: 'Document introuvable' });
@@ -212,5 +254,5 @@ const removePermission = async (req, res) => {
 module.exports = {
     listDocuments, createDocument, getDocument, updateDocument, deleteDocument,
     listFiles, addFile, replaceFile, downloadFile, deleteFile,
-    listPermissions, setPermission, removePermission
+    listPermissions, listCollaborators, setPermission, removePermission
 };

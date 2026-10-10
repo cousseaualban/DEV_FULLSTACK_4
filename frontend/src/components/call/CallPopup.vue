@@ -32,13 +32,21 @@ const titleColorClass = computed(() => (isIncoming.value ? 'text-violet-600' : '
 
 watch(
   () => props.callState,
-  async (newCallState) => {
+  (newCallState) => {
     if (!newCallState) {
       stopMicrophone()
       return
     }
 
-    await requestMicrophoneAccess()
+    if (microphoneStream.value) {
+      const audioTrack = microphoneStream.value.getAudioTracks()[0]
+      if (audioTrack) {
+        audioTrack.enabled = !isMicrophoneMuted.value
+      }
+      return
+    }
+
+    microphoneStatus.value = 'Cliquez sur « Autoriser le micro » pour démarrer l’appel.'
   },
   { immediate: true },
 )
@@ -71,6 +79,12 @@ async function requestMicrophoneAccess() {
   } catch (error) {
     console.error('Erreur d’accès au micro :', error)
     isMicrophoneGranted.value = false
+
+    if (error instanceof DOMException && (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError')) {
+      microphoneStatus.value = 'Accès au micro refusé. Ouvrez les permissions du navigateur et autorisez le micro, puis réessayez.'
+      return
+    }
+
     microphoneStatus.value = 'Accès au micro refusé. Autorisez-le dans le navigateur.'
   }
 }
@@ -99,9 +113,9 @@ function stopMicrophone() {
   microphoneStatus.value = ''
 }
 
-function handleAccept() {
+async function handleAccept() {
   emit('accept')
-  requestMicrophoneAccess()
+  await requestMicrophoneAccess()
 }
 
 function handleRefuse() {

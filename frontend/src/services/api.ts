@@ -4,10 +4,11 @@ export async function apiRequest(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<any> {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('token') ?? localStorage.getItem('authToken')
 
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),

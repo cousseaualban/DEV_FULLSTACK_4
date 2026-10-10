@@ -4,15 +4,18 @@ import BaseModal from '../common/BaseModal.vue'
 import {
   collaboratorService,
   type Collaborator,
+  type CollaboratorRole,
   type UserSearchResult,
 } from '../../services/collaboratorService'
 
 const props = withDefaults(
   defineProps<{
     open: boolean
+    documentId?: string
     alreadyInvitedUserIds?: string[]
   }>(),
   {
+    documentId: '1',
     alreadyInvitedUserIds: () => [],
   }
 )
@@ -25,6 +28,7 @@ const emit = defineEmits<{
 const selectedUsers = ref<string[]>([])
 const users = ref<UserSearchResult[]>([])
 const searchQuery = ref('')
+const inviteRole = ref<CollaboratorRole>('editor')
 
 const availableUsers = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -55,6 +59,7 @@ watch(
     if (isOpen) {
       selectedUsers.value = []
       searchQuery.value = ''
+      inviteRole.value = 'editor'
     }
   }
 )
@@ -62,6 +67,7 @@ watch(
 function closeModal() {
   selectedUsers.value = []
   searchQuery.value = ''
+  inviteRole.value = 'editor'
   emit('close')
 }
 
@@ -73,12 +79,13 @@ async function inviteCollaborator() {
   }
 
   const invitedCollaborators = await Promise.all(
-    toInvite.map((userId) => collaboratorService.inviteCollaborator(userId))
+    toInvite.map((userId) => collaboratorService.inviteCollaborator(userId, props.documentId, inviteRole.value))
   )
 
   emit('invite', invitedCollaborators)
   selectedUsers.value = []
   searchQuery.value = ''
+  inviteRole.value = 'editor'
 }
 </script>
 
@@ -91,13 +98,27 @@ async function inviteCollaborator() {
     <div class="space-y-4">
       <div class="space-y-2">
         <label class="block text-slate-700">
-          Collaborateurs
+          Rôle pour les invités
+        </label>
+
+        <select
+          v-model="inviteRole"
+          class="w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-800"
+        >
+          <option value="editor">Éditeur</option>
+          <option value="viewer">Lecteur</option>
+        </select>
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-slate-700">
+          Utilisateurs
         </label>
 
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Rechercher un collaborateur"
+          placeholder="Rechercher par prénom, nom ou e-mail"
           class="w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-800"
         >
 
@@ -116,7 +137,7 @@ async function inviteCollaborator() {
               >
 
               <span class="flex-1 text-slate-700">
-                {{ user.name }}
+                {{ user.name }} — {{ user.email }}
               </span>
             </label>
           </template>

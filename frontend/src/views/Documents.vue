@@ -26,6 +26,16 @@
 
         <div class="flex items-center justify-end gap-3">
 
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-3
+                   text-white font-medium shadow-sm hover:bg-violet-700
+                   hover:shadow-md transition cursor-pointer"
+            @click="simulateIncomingCall"
+          >
+            Simuler appel
+          </button>
+
           <!-- Bouton Créer -->
           <div class="relative">
             <button
@@ -394,6 +404,8 @@
 <script setup>
 import { computed, ref, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { collaboratorService } from '@/services/collaboratorService'
+import { setCallState } from '@/stores/callStore'
 
 const router = useRouter()
 const route = useRoute()
@@ -616,6 +628,35 @@ function openDocument(doc) {
   })
 }
 
+async function simulateIncomingCall() {
+  try {
+    const collaborators = await collaboratorService.getCollaboratorsByDocument('1')
+    const firstCollaborator = collaborators[0]
+
+    if (!firstCollaborator) {
+      setCallState({
+        collaboratorId: '1',
+        collaboratorName: 'Utilisateur connecté',
+        mode: 'incoming',
+      })
+      return
+    }
+
+    setCallState({
+      collaboratorId: String(firstCollaborator.userId ?? firstCollaborator.id),
+      collaboratorName: firstCollaborator.name || firstCollaborator.email || 'Collaborateur',
+      mode: 'incoming',
+    })
+  } catch (error) {
+    console.error('Erreur lors de la récupération du collaborateur pour l’appel simulé :', error)
+    setCallState({
+      collaboratorId: '1',
+      collaboratorName: 'Utilisateur connecté',
+      mode: 'incoming',
+    })
+  }
+}
+
 function goToRoot() {
   router.push('/documents')
 }
@@ -652,6 +693,7 @@ async function logout() {
     console.error('Erreur lors de la déconnexion :', error)
   } finally {
     localStorage.removeItem('token')
+    localStorage.removeItem('authToken')
     localStorage.removeItem('user')
     localStorage.removeItem('isAuthenticated')
 

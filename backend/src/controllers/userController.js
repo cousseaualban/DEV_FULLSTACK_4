@@ -1,4 +1,33 @@
-const { getUserById, updateUser } = require("../services/userService");
+const { getUserById, updateUser, getAllUsers } = require("../services/userService");
+
+const searchUsers = async (req, res) => {
+  try {
+    const rawQuery = String(req.query.q ?? '').trim();
+    const users = await getAllUsers();
+    const query = rawQuery.toLowerCase();
+
+    const filteredUsers = !query
+      ? users
+      : users.filter((user) => {
+          const fullName = `${user.firstName} ${user.lastName}`.trim().toLowerCase();
+          const haystack = `${fullName} ${user.email}`.toLowerCase();
+          return haystack.includes(query);
+        });
+
+    const payload = filteredUsers.slice(0, 20).map((user) => ({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      name: `${user.firstName} ${user.lastName}`.trim(),
+    }));
+
+    res.status(200).json({ users: payload });
+  } catch (error) {
+    console.error("Erreur lors de la recherche des utilisateurs :", error);
+    res.status(500).json({ message: "Impossible de récupérer les utilisateurs" });
+  }
+};
 
 const getCurrentUser = async (req, res) => {
   try {
@@ -68,6 +97,7 @@ const updateCurrentUser = async (req, res) => {
 };
 
 module.exports = {
+  searchUsers,
   getCurrentUser,
   updateCurrentUser,
 };
