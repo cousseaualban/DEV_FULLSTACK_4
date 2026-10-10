@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Test collaboration</title>
+</head>
+<body>
+  <h1>Test collaboration</h1>
+
+  <p id="status">Connexion en cours...</p>
+
+  <button id="disconnect">Déconnecter</button>
+  <button id="connect">Reconnecter</button>
+
+  <hr>
+
+  <label for="user">Utilisateur :</label>
+  <select id="user">
+    <option value="user-nguyen">Nguyen</option>
+    <option value="user-alban">Alban</option>
+    <option value="user-ilef">Ilef</option>
+    <option value="user-sam">Sam</option>
+  </select>
+
+  <label for="document">Document :</label>
+  <select id="document">
+    <option value="doc-1">Présentation du projet</option>
+    <option value="doc-2">Notes de réunion</option>
+  </select>
+
+  <button id="join">Rejoindre le document</button>
+
+  <p id="document-status">Aucun document rejoint.</p>
+
+  <textarea
+    id="editor"
+    rows="12"
+    cols="80"
+    aria-label="Contenu du document"
+    disabled
+  ></textarea>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/test-collaboration.bundle.js"></script>
+</body>
+</html>
