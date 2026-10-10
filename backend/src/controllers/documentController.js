@@ -63,29 +63,59 @@ const getDocument = async (req, res) => {
     res.json({ document });
 };
 
+
 const updateDocument = async (req, res) => {
     const access = await getDocumentAccess(parseId(req.params.id), req.user.id);
     if (!access) return res.status(404).json({ message: 'Document introuvable' });
     if (!hasPermission(access, 'WRITE')) return res.status(403).json({ message: 'Droit d’écriture requis' });
-    if (req.body.name !== undefined && !validName(req.body.name)) return res.status(400).json({ message: 'Nom de document invalide' });
+    if (req.body.name !== undefined && !validName(req.body.name)) {
+        return res.status(400).json({ message: 'Nom de document invalide' });
+    }
+    if (req.body.content !== undefined && typeof req.body.content !== 'string') {
+        return res.status(400).json({ message: 'Contenu du document invalide' });
+    }
 
     const data = { lastModifiedById: req.user.id };
+
     if (req.body.name !== undefined) data.name = req.body.name.trim();
+    if (req.body.content !== undefined) data.content = req.body.content;
+
     if (req.body.folderId !== undefined) {
         const parsedFolderId = req.body.folderId === null ? null : parseId(req.body.folderId);
-        if (req.body.folderId !== null && !parsedFolderId) return res.status(400).json({ message: 'Identifiant de dossier invalide' });
-        const folder = parsedFolderId === null ? null : await prisma.folder.findFirst({ where: { id: parsedFolderId, ownerId: access.document.ownerId } });
-        if (req.body.folderId !== null && !folder) return res.status(404).json({ message: 'Dossier introuvable' });
+
+        if (req.body.folderId !== null && !parsedFolderId) {
+            return res.status(400).json({ message: 'Identifiant de dossier invalide' });
+        }
+
+        const folder = parsedFolderId === null
+            ? null
+            : await prisma.folder.findFirst({
+                where: {
+                    id: parsedFolderId,
+                    ownerId: access.document.ownerId
+                }
+            });
+
+        if (req.body.folderId !== null && !folder) {
+            return res.status(404).json({ message: 'Dossier introuvable' });
+        }
+
         data.folderId = parsedFolderId === null ? null : folder.id;
     }
 
     const document = await prisma.document.update({
         where: { id: access.document.id },
         data,
-        include: { lastModifiedBy: { select: { id: true, firstName: true, lastName: true } } }
+        include: {
+            lastModifiedBy: {
+                select: { id: true, firstName: true, lastName: true }
+            }
+        }
     });
+
     res.json({ document });
 };
+
 
 const deleteDocument = async (req, res) => {
     const access = await getDocumentAccess(parseId(req.params.id), req.user.id);

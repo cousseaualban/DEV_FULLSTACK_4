@@ -70,7 +70,7 @@ async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T
     headers.set('Content-Type', 'application/json')
   }
 
-  const response = await fetch(`/api${path}`, {
+  const response = await fetch(`http://localhost:5000/api${path}`, {
     ...options,
     cache: 'no-store',
     headers,

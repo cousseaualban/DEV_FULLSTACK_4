@@ -2,21 +2,14 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.js",
+  "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
     "start": "node src/server.js",
-    "postinstall": "prisma generate"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^5.2.1",
-    "socket.io": "^4.8.4",
-    "yjs": "^13.6.33"
+    "postinstall": "prisma generate",
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
@@ -30,7 +23,8 @@
     "jsonwebtoken": "^9.0.3",
     "mariadb": "^3.5.4",
     "multer": "^2.0.2",
-    "otplib": "^13.5.0"
+    "otplib": "^13.5.0",
+    "socket.io": "^4.8.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.14",

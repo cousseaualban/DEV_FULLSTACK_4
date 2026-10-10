@@ -51,6 +51,7 @@ model Folder {
 model Document {
   id               Int      @id @default(autoincrement())
   name             String
+  content          String   @default("")
   ownerId          Int
   folderId         Int?
   lastModifiedById Int?

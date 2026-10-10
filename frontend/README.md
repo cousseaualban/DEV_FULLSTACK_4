@@ -1,42 +1,38 @@
-# .
+# Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Interface web du projet, développée avec **Vue 3** et **TypeScript**.
 
-## Recommended IDE Setup
+## Technologies choisies
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- **Vue 3** permet de construire une interface réactive à partir de composants réutilisables, notamment des composants monofichiers `.vue`.
+- **TypeScript** apporte le typage statique au code de l'interface. Il aide à détecter certaines erreurs dès le développement et rend les échanges de données plus faciles à maintenir.
+- **Vue Router** gère la navigation entre les pages de l'application.
+- **Vite** fournit le serveur de développement et le bundler de production, avec un retour rapide pendant le développement.
 
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+## Installation
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+## Développement
+
+Lancer le serveur de développement avec rechargement à chaud :
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+## Build de production
+
+Compiler et optimiser l'application pour la production :
 
 ```sh
 npm run build
+```
+
+Pour prévisualiser le build localement :
+
+```sh
+npm run preview
 ```

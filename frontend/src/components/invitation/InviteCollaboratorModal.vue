@@ -49,9 +49,16 @@ const availableUsers = computed(() => {
   })
 })
 
+
 onMounted(async () => {
-  users.value = await collaboratorService.searchUsers('')
+  try {
+    users.value = await collaboratorService.searchUsers('')
+    console.log('Utilisateurs chargés :', users.value)
+  } catch (error) {
+    console.error('Erreur de chargement des utilisateurs :', error)
+  }
 })
+
 
 watch(
   () => props.open,

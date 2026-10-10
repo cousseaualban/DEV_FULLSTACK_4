@@ -160,6 +160,30 @@
                 Mon profil
               </button>
 
+              <button
+                v-if="isAdmin"
+                @click="goToAdmin"
+                type="button"
+                class="flex w-full items-center gap-3 rounded-xl px-3 py-3
+                      text-left text-sm text-slate-700 hover:bg-blue-50
+                      hover:text-blue-700 transition"
+              >
+                <svg
+                  class="h-5 w-5 shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+                  <path d="M19 8h3M20.5 6.5v3" />
+                </svg>
+                Administration des comptes
+              </button>
+              
               <div class="my-1 border-t border-slate-100"></div>
 
               <button
@@ -406,9 +430,12 @@ import { computed, ref, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { collaboratorService } from '@/services/collaboratorService'
 import { setCallState } from '@/stores/callStore'
+import { apiRequest } from '@/services/api'
 
 const router = useRouter()
 const route = useRoute()
+const user = JSON.parse(localStorage.getItem('user') || 'null')
+const isAdmin = computed(() => user?.role === 'ADMIN')
 
 const search = ref('')
 const showCreateMenu = ref(false)
@@ -443,69 +470,45 @@ const currentFolder = computed(() => {
   return folders.value.find(folder => folder.id === folderId.value) || null
 })
 
-function loadData() {
-  const loadedFolders = []
-  const loadedDocuments = []
 
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i)
-    if (!key) continue
+async function loadData() {
+  try {
+    const folderId = route.query.folder
+      ? Number(route.query.folder)
+      : null
 
-    if (key.startsWith('dossier-')) {
-      try {
-        const data = JSON.parse(localStorage.getItem(key))
-        if (data && typeof data === 'object' && data.title) {
-          loadedFolders.push({
-            id: key,
-            title: data.title,
-            createdAt: data.createdAt || new Date().toISOString()
-          })
-        }
-      } catch {
-        // Ignore les données invalides.
-      }
-    }
+    const foldersEndpoint = folderId
+      ? `/folders?parentId=${folderId}`
+      : '/folders'
 
-    if (key.startsWith('document-')) {
-      try {
-        const data = JSON.parse(localStorage.getItem(key))
-        if (data && typeof data === 'object' && data.title) {
-          loadedDocuments.push({
-            id: key,
-            title: data.title,
-            content: data.content || '',
-            folderId: data.folderId || '',
-            lastModified: data.lastModified || new Date().toISOString()
-          })
-        }
-      } catch {
-        // Ignore les données invalides.
-      }
-    }
+    const documentsEndpoint = folderId
+      ? `/documents?folderId=${folderId}`
+      : '/documents'
+
+    const [foldersResponse, documentsResponse] = await Promise.all([
+      apiRequest(foldersEndpoint),
+      apiRequest(documentsEndpoint)
+    ])
+
+    folders.value = foldersResponse.folders.map(folder => ({
+      id: String(folder.id),
+      title: folder.name,
+      createdAt: folder.createdAt || new Date().toISOString()
+    }))
+
+    documents.value = documentsResponse.documents.map(document => ({
+      id: String(document.id),
+      title: document.name,
+      content: document.content || '',
+      folderId: document.folderId == null
+        ? ''
+        : String(document.folderId),
+      lastModified: document.updatedAt || new Date().toISOString(),
+      lastModifiedBy: document.lastModifiedBy || null
+    }))
+  } catch (error) {
+    console.error('Erreur lors du chargement des documents :', error)
   }
-
-  if (!loadedFolders.some(folder => folder.id === 'dossier-projets')) {
-    loadedFolders.push({
-      id: 'dossier-projets',
-      title: 'Projets',
-      createdAt: new Date().toISOString(),
-      isBuiltIn: true
-    })
-  }
-
-  if (!loadedDocuments.some(doc => doc.id === 'document-racine')) {
-    loadedDocuments.push({
-      id: 'document-racine',
-      title: 'Mon premier document',
-      content: '',
-      folderId: '',
-      lastModified: new Date().toISOString(),
-      isBuiltIn: true
-    })
-  }
-
-  folders.value = loadedFolders
-  documents.value = loadedDocuments
 }
 
 const visibleFolders = computed(() => {
@@ -558,7 +561,8 @@ function closeCreateModal() {
   itemError.value = ''
 }
 
-function saveItem() {
+
+async function saveItem() {
   const title = itemName.value.trim()
 
   if (!title) {
@@ -578,35 +582,53 @@ function saveItem() {
       return
     }
 
-    const id = `dossier-${Date.now()}`
+    try {
+      const folderId = route.query.folder
+        ? Number(route.query.folder)
+        : null
 
-    localStorage.setItem(id, JSON.stringify({
-      title,
-      createdAt: new Date().toISOString()
-    }))
+      await apiRequest('/folders', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: title,
+          ...(folderId ? { parentId: folderId } : {})
+        })
+      })
 
-    closeCreateModal()
-    loadData()
+      closeCreateModal()
+      await loadData()
+    } catch (error) {
+      itemError.value = error.message || 'Impossible de créer le dossier.'
+    }
+
     return
   }
 
-  const id = `document-${Date.now()}`
-  const now = new Date().toISOString()
+  try {
+    const folderId = route.query.folder
+      ? Number(route.query.folder)
+      : null
 
-  localStorage.setItem(id, JSON.stringify({
-    title,
-    content: '',
-    folderId: folderId.value || '',
-    lastModified: now
-  }))
+    const response = await apiRequest('/documents', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: title,
+        ...(folderId ? { folderId } : {})
+      })
+    })
 
-  closeCreateModal()
-  loadData()
+    const id = String(response.document.id)
 
-  router.push({
-    path: '/documents/editor',
-    query: { document: id }
-  })
+    closeCreateModal()
+    await loadData()
+
+    router.push({
+      path: '/documents/editor',
+      query: { document: id }
+    })
+  } catch (error) {
+    itemError.value = error.message || 'Impossible de créer le document.'
+  }
 }
 
 function openFolder(folder) {
@@ -664,6 +686,11 @@ function goToRoot() {
 function goToProfile() {
   showProfileMenu.value = false
   router.push('/profile')
+}
+
+function goToAdmin() {
+  showProfileMenu.value = false
+  router.push('/admin/users')
 }
 
 function formatDate(dateValue) {
